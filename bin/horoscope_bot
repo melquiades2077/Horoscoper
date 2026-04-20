@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/horoscope_bot'
+
+token = ENV.fetch('TELEGRAM_BOT_TOKEN', nil)
+
+if token.nil? || token.empty?
+  warn 'Ошибка: не задан TELEGRAM_BOT_TOKEN в переменных окружения.'
+  warn 'Пример запуска: TELEGRAM_BOT_TOKEN=xxxxx bundle exec ruby bin/horoscope_bot'
+  exit 1
+end
+
+HoroscopeBot::Application.new(token: token).run
