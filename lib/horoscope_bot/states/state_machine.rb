@@ -16,7 +16,7 @@ module HoroscopeBot
       end
 
       def set(user_id, state_name, context = {})
-        state = UserState.new(name: state_name, context: context)
+        state = UserState.new(name: state_name, context:)
         @store.write(user_id, state.to_h)
         state
       end
@@ -34,7 +34,7 @@ module HoroscopeBot
       private
 
       def stringify_keys(hash)
-        hash.each_with_object({}) { |(k, v), acc| acc[k.to_s] = v }
+        hash.transform_keys(&:to_s)
       end
     end
   end

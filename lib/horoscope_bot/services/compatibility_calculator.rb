@@ -17,9 +17,9 @@ module HoroscopeBot
       # Базовая совместимость стихий: одинаковые и дружественные пары высокие,
       # антагонистичные — низкие.
       ELEMENT_MATRIX = {
-        %i[fire fire] => 85,  %i[fire air] => 90,   %i[fire earth] => 50, %i[fire water] => 45,
-        %i[earth earth] => 85, %i[earth water] => 90, %i[earth air] => 50,  %i[earth fire] => 50,
-        %i[air air] => 85,    %i[air fire] => 90,   %i[air water] => 55,  %i[air earth] => 50,
+        %i[fire fire] => 85, %i[fire air] => 90, %i[fire earth] => 50, %i[fire water] => 45,
+        %i[earth earth] => 85, %i[earth water] => 90, %i[earth air] => 50, %i[earth fire] => 50,
+        %i[air air] => 85, %i[air fire] => 90, %i[air water] => 55, %i[air earth] => 50,
         %i[water water] => 85, %i[water earth] => 90, %i[water fire] => 45, %i[water air] => 55
       }.freeze
 

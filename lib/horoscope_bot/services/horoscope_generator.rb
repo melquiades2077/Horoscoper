@@ -59,7 +59,7 @@ module HoroscopeBot
       end
 
       def build_message(sign, template, theme, advice, emoji, lucky_number)
-        body = format(template, theme: theme, advice: advice)
+        body = format(template, theme:, advice:)
         <<~MSG
           #{emoji} Гороскоп для #{Zodiac.format(sign)} на #{@date.strftime('%d.%m.%Y')}
 

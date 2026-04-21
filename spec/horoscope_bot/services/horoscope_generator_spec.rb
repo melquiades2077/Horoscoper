@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe HoroscopeBot::Services::HoroscopeGenerator do
+  subject(:generator) { described_class.new(date:) }
+
   let(:date) { Date.new(2025, 6, 15) }
-  subject(:generator) { described_class.new(date: date) }
+
 
   it 'возвращает текст, содержащий название знака' do
     expect(generator.generate('leo')).to include('Лев')
@@ -13,8 +15,8 @@ RSpec.describe HoroscopeBot::Services::HoroscopeGenerator do
   end
 
   it 'детерминирован для одной пары (знак, дата)' do
-    a = described_class.new(date: date).generate('aries')
-    b = described_class.new(date: date).generate('aries')
+    a = described_class.new(date:).generate('aries')
+    b = described_class.new(date:).generate('aries')
     expect(a).to eq(b)
   end
 

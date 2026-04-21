@@ -16,7 +16,7 @@ module HoroscopeBot
     def run
       @logger.info('Запуск Horoscope Bot...')
       Telegram::Bot::Client.run(@token) do |bot|
-        router = CommandRouter.new(bot: bot, ctx: build_context)
+        router = CommandRouter.new(bot:, ctx: build_context)
         bot.listen { |update| dispatch(router, update) }
       end
     end

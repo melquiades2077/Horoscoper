@@ -10,18 +10,18 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
   let(:users) { HoroscopeBot::Storage::UserRepository.new(users_store) }
   let(:states) { HoroscopeBot::States::StateMachine.new(states_store) }
   let(:logger) { Logger.new(IO::NULL) }
-  let(:ctx) { { users: users, states: states, logger: logger } }
+  let(:ctx) { { users:, states:, logger: } }
   let(:bot) { FakeBot.new }
-  let(:router) { HoroscopeBot::CommandRouter.new(bot: bot, ctx: ctx) }
+  let(:router) { HoroscopeBot::CommandRouter.new(bot:, ctx:) }
 
   after { FileUtils.rm_rf(tmp_dir) }
 
   def send_message(text, user_id: 42)
-    router.route(MessageBuilder.build(text: text, user_id: user_id))
+    router.route(MessageBuilder.build(text:, user_id:))
   end
 
   def click_inline(data, user_id: 42)
-    router.route_callback(MessageBuilder.build_callback(data: data, user_id: user_id))
+    router.route_callback(MessageBuilder.build_callback(data:, user_id:))
   end
 
   describe '/start' do

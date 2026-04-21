@@ -11,4 +11,4 @@ if token.nil? || token.empty?
   exit 1
 end
 
-HoroscopeBot::Application.new(token: token).run
+HoroscopeBot::Application.new(token:).run

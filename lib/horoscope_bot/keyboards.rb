@@ -14,12 +14,12 @@ module HoroscopeBot
     # Маппинг текста кнопки reply-меню на команду.
     # Роутер использует его, чтобы нажатия кнопок работали как команды.
     BUTTON_TO_COMMAND = {
-      '🔮 Гороскоп'       => '/horoscope',
-      '💞 Совместимость'  => '/compatibility',
-      '🃏 Таро'           => '/tarot',
-      '📜 История'        => '/history',
-      '⚙️ Настройки'      => '/settings',
-      '❓ Помощь'          => '/help'
+      '🔮 Гороскоп' => '/horoscope',
+      '💞 Совместимость' => '/compatibility',
+      '🃏 Таро' => '/tarot',
+      '📜 История' => '/history',
+      '⚙️ Настройки' => '/settings',
+      '❓ Помощь' => '/help'
     }.freeze
 
     module_function

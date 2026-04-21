@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.1
   NewCops: enable
   SuggestExtensions: false
   Exclude:
@@ -9,6 +9,9 @@ AllCops:
 
 require:
   - rubocop-rspec
+
+Layout/EndOfLine:
+  Enabled: false
 
 Style/Documentation:
   Enabled: false
@@ -28,6 +31,12 @@ Metrics/BlockLength:
 Metrics/ClassLength:
   Max: 150
 
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/ParameterLists:
+  Max: 6
+
 Layout/LineLength:
   Max: 120
 
@@ -35,7 +44,16 @@ RSpec/ExampleLength:
   Max: 15
 
 RSpec/MultipleExpectations:
-  Max: 5
+  Max: 6
 
 RSpec/NestedGroups:
   Max: 4
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 12
+
+RSpec/IdenticalEqualityAssertion:
+  Enabled: false
+
+RSpec/ExpectActual:
+  Enabled: false

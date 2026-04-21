@@ -45,7 +45,7 @@ module HoroscopeBot
       end
 
       def reply(text, **opts)
-        bot.api.send_message(chat_id: chat_id, text: text, **opts)
+        bot.api.send_message(chat_id:, text:, **opts)
       end
 
       # Reply-клавиатура (постоянное меню снизу экрана).

@@ -11,7 +11,7 @@ class FakeBotApi
   end
 
   def send_message(chat_id:, text:, **opts)
-    @sent_messages << { chat_id: chat_id, text: text, **opts }
+    @sent_messages << { chat_id:, text:, **opts }
   end
 
   def answer_callback_query(callback_query_id:, **_opts)

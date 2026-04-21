@@ -40,7 +40,7 @@ module HoroscopeBot
       private
 
       def stringify_keys(hash)
-        hash.each_with_object({}) { |(k, v), acc| acc[k.to_s] = v }
+        hash.transform_keys(&:to_s)
       end
     end
   end

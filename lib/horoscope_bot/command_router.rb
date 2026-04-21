@@ -109,7 +109,7 @@ module HoroscopeBot
       command_class = COMMANDS[cmd_key]
 
       if command_class
-        command_class.new(message: message, bot: @bot, ctx: @ctx).call
+        command_class.new(message:, bot: @bot, ctx: @ctx).call
       else
         send_fallback(message.chat.id, "Неизвестная команда: #{cmd_key}. Отправьте /help.")
       end
@@ -130,15 +130,15 @@ module HoroscopeBot
         return
       end
 
-      handler_class.new(message: message, bot: @bot, ctx: @ctx).handle_state(state)
+      handler_class.new(message:, bot: @bot, ctx: @ctx).handle_state(state)
     end
 
     def send_fallback(chat_id, text)
-      @bot.api.send_message(chat_id: chat_id, text: text)
+      @bot.api.send_message(chat_id:, text:)
     end
 
     def answer_callback(callback_query_id)
-      @bot.api.answer_callback_query(callback_query_id: callback_query_id)
+      @bot.api.answer_callback_query(callback_query_id:)
     rescue StandardError
       # не критично, если не получилось — продолжаем
     end
