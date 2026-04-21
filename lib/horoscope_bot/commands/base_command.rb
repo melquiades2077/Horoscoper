@@ -49,25 +49,26 @@ module HoroscopeBot
       end
 
       # Reply-клавиатура (постоянное меню снизу экрана).
+      # Разметку передаём как plain hash — Telegram API принимает JSON,
+      # и гем сам сериализует хэш. Это надёжнее, чем зависеть от dry-struct
+      # валидации в конкретной версии telegram-bot-ruby.
       # @param buttons [Array<Array<String>>] массив рядов кнопок
       def reply_with_keyboard(text, buttons)
-        keyboard = Telegram::Bot::Types::ReplyKeyboardMarkup.new(
-          keyboard: buttons,
+        markup = {
+          keyboard: buttons.map { |row| row.map { |label| { text: label } } },
           resize_keyboard: true,
-          one_time_keyboard: false
-        )
-        reply(text, reply_markup: keyboard)
+          one_time_keyboard: false,
+          is_persistent: true
+        }
+        reply(text, reply_markup: markup.to_json)
       end
 
       # Inline-клавиатура (кнопки под конкретным сообщением).
       # @param buttons [Array<Array<Hash>>] массив рядов,
       #   каждая кнопка — { text:, callback_data: }
       def reply_with_inline(text, buttons)
-        rows = buttons.map do |row|
-          row.map { |btn| Telegram::Bot::Types::InlineKeyboardButton.new(**btn) }
-        end
-        markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: rows)
-        reply(text, reply_markup: markup)
+        markup = { inline_keyboard: buttons }
+        reply(text, reply_markup: markup.to_json)
       end
 
       def users

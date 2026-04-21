@@ -2,58 +2,79 @@
 
 module HoroscopeBot
   module Commands
-    # ============================================================
-    # ЗАГЛУШКА ДЛЯ ОДНОГРУППНИКА — РЕАЛИЗАЦИЯ КАРТ ТАРО
-    # ============================================================
+    # Команда /tarot. Предлагает выбрать тип расклада через inline-кнопки,
+    # делает расклад и сохраняет его в истории пользователя.
     #
-    # Эта команда — точка расширения. Вся инфраструктура (бот, состояния,
-    # персистентность, тесты, CI) уже готова. Тебе нужно только реализовать
-    # логику расклада Таро внутри этого класса.
-    #
-    # ЧТО НУЖНО СДЕЛАТЬ:
-    #
-    # 1. Создать сервис lib/horoscope_bot/services/tarot_reader.rb
-    #    — хранит колоду (78 карт: 22 Старших + 56 Младших Арканов)
-    #    — метод #draw(count) возвращает расклад из N карт
-    #    — каждая карта: { name:, meaning:, reversed: true/false }
-    #
-    # 2. Реализовать метод #call в этом классе:
-    #    — предложить пользователю выбрать тип расклада
-    #      ("1 карта дня", "3 карты: прошлое-настоящее-будущее",
-    #       "5 карт: кельтский крест" и т.п.)
-    #    — перевести пользователя в новое состояние AWAITING_TAROT_SPREAD
-    #      (добавь это состояние в UserState::VALID_STATES)
-    #
-    # 3. Реализовать метод #handle_state:
-    #    — обработать выбор типа расклада
-    #    — вызвать TarotReader, красиво отформатировать результат
-    #    — сбросить состояние после выдачи
-    #
-    # 4. Написать тесты в spec/horoscope_bot/commands/tarot_command_spec.rb
-    #    и spec/horoscope_bot/services/tarot_reader_spec.rb
-    #    (используй шаблон из compatibility_command_spec.rb)
-    #
-    # 5. Зарегистрировать новые состояния в StateMachine, если нужно —
-    #    добавь их в UserState::VALID_STATES.
-    #
-    # 6. Зарегистрировать команду в CommandRouter — она уже есть,
-    #    менять ничего не надо.
-    #
-    # ИДЕИ ДЛЯ ПЕРСИСТЕНТНОСТИ (для повышения балла):
-    #    — сохранять историю раскладов пользователя в users репозиторий:
-    #      users.save(user_id, last_tarot: { date:, spread:, cards: [...] })
-    #    — добавить команду /history, показывающую последние 5 раскладов.
-    #
-    # ============================================================
+    # callback_data имеет вид "tarot:<spread_key>", где spread_key —
+    # один из ключей Services::TarotReader::SPREADS.
     class TarotCommand < BaseCommand
-      STUB_MESSAGE = <<~TEXT
-        🔮 Раздел «Карты Таро» в разработке.
+      CALLBACK_PREFIX = 'tarot'
+      MAX_HISTORY_SIZE = 5
 
-        Скоро здесь появятся расклады на день, на отношения и кельтский крест.
+      INTRO = <<~TEXT
+        🃏 Расклад карт Таро.
+
+        Выберите тип расклада:
       TEXT
 
       def call
-        reply(STUB_MESSAGE)
+        states.set(user_id, States::UserState::AWAITING_TAROT_SPREAD)
+        reply_with_inline(INTRO, spread_buttons)
+      end
+
+      def handle_callback(_state, callback_data)
+        _prefix, spread_key = callback_data.split(':', 2)
+        perform_spread(spread_key)
+      end
+
+      # Резервный сценарий: пользователь ввёл ключ расклада текстом.
+      def handle_state(_state)
+        key = message.text.to_s.strip.downcase
+        if Services::TarotReader::SPREADS.key?(key)
+          perform_spread(key)
+        else
+          reply('Пожалуйста, нажмите одну из кнопок выше или отправьте /cancel.')
+        end
+      end
+
+      private
+
+      def spread_buttons
+        Services::TarotReader::SPREADS.map do |key, spread|
+          [{ text: "#{spread[:title]} (#{spread[:count]})",
+             callback_data: "#{CALLBACK_PREFIX}:#{key}" }]
+        end
+      end
+
+      def perform_spread(spread_key)
+        reader = Services::TarotReader.new
+        cards = reader.draw(spread_key)
+        text = Services::TarotReader.format(spread_key, cards)
+
+        save_to_history(spread_key, cards)
+        states.reset(user_id)
+        reply(text)
+      rescue ArgumentError => e
+        logger&.error("TarotCommand: #{e.message}")
+        reply('Не получилось сделать расклад. Попробуйте /tarot заново.')
+      end
+
+      # Сохраняет последние MAX_HISTORY_SIZE раскладов в профиле пользователя.
+      def save_to_history(spread_key, cards)
+        profile = users.find(user_id)
+        history = Array(profile['tarot_history'])
+
+        entry = {
+          'date' => Time.now.iso8601,
+          'spread' => spread_key,
+          'cards' => cards.map { |c| c.transform_keys(&:to_s) }
+        }
+
+        updated = ([entry] + history).first(MAX_HISTORY_SIZE)
+        users.save(user_id, tarot_history: updated)
+        logger&.info("[Tarot] Saved spread=#{spread_key} for user=#{user_id}, total=#{updated.size}")
+      rescue StandardError => e
+        logger&.error("[Tarot] Failed to save history: #{e.class}: #{e.message}")
       end
     end
   end

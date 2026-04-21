@@ -18,6 +18,7 @@ module HoroscopeBot
       '/horoscope' => Commands::HoroscopeCommand,
       '/compatibility' => Commands::CompatibilityCommand,
       '/tarot' => Commands::TarotCommand,
+      '/history' => Commands::HistoryCommand,
       '/cancel' => Commands::CancelCommand
     }.freeze
 
@@ -25,14 +26,16 @@ module HoroscopeBot
     STATE_HANDLERS = {
       States::UserState::AWAITING_BIRTHDATE => Commands::SettingsCommand,
       States::UserState::AWAITING_COMPATIBILITY_FIRST => Commands::CompatibilityCommand,
-      States::UserState::AWAITING_COMPATIBILITY_SECOND => Commands::CompatibilityCommand
+      States::UserState::AWAITING_COMPATIBILITY_SECOND => Commands::CompatibilityCommand,
+      States::UserState::AWAITING_TAROT_SPREAD => Commands::TarotCommand
     }.freeze
 
     # Какая команда обрабатывает callback с данным префиксом (до первого двоеточия).
     # Например, callback_data="compat1:leo" → префикс "compat1" → CompatibilityCommand.
     CALLBACK_HANDLERS = {
       'compat1' => Commands::CompatibilityCommand,
-      'compat2' => Commands::CompatibilityCommand
+      'compat2' => Commands::CompatibilityCommand,
+      'tarot' => Commands::TarotCommand
     }.freeze
 
     FALLBACK_TEXT = 'Не понимаю. Нажмите кнопку или отправьте /help.'
@@ -55,8 +58,8 @@ module HoroscopeBot
         handle_state(message, user_id)
       end
     rescue StandardError => e
-      @ctx[:logger]&.error("Router error: #{e.class}: #{e.message}")
-      send_fallback(message.chat.id, 'Произошла ошибка. Попробуйте /cancel и начните заново.')
+      @ctx[:logger]&.error("Router error: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
+      send_fallback(message.chat.id, "Произошла ошибка (#{e.class}): #{e.message}. Отправьте /cancel.")
     end
 
     # Обработка нажатия inline-кнопки (callback_query).
@@ -71,12 +74,24 @@ module HoroscopeBot
 
       return if handler_class.nil?
 
-      message = callback_query.message
+      # ВАЖНО: callback_query.message.from — это БОТ (автор сообщения с кнопкой),
+      # а не тот, кто нажал. Собираем простой объект, у которого .from — реальный
+      # пользователь, а .chat — из оригинального сообщения.
+      proxy = CallbackMessageProxy.new(
+        from: callback_query.from,
+        chat: callback_query.message.chat,
+        text: nil
+      )
+      @ctx[:logger]&.info("[Callback] user=#{user_id} data=#{data}")
       state = @ctx[:states].get(user_id)
-      handler_class.new(message: message, bot: @bot, ctx: @ctx).handle_callback(state, data)
+      handler_class.new(message: proxy, bot: @bot, ctx: @ctx).handle_callback(state, data)
     rescue StandardError => e
-      @ctx[:logger]&.error("Callback router error: #{e.class}: #{e.message}")
+      @ctx[:logger]&.error("Callback router error: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
     end
+
+    # Простой контейнер сообщения для callback-ов.
+    # Явно задаём все нужные поля, чтобы не было сюрпризов с method_missing.
+    CallbackMessageProxy = Struct.new(:from, :chat, :text, keyword_init: true)
 
     private
 

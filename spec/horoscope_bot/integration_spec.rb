@@ -28,7 +28,8 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
     it 'приветствует и показывает главное меню-клавиатуру' do
       send_message('/start')
       expect(bot.api.last_text).to include('Добро пожаловать')
-      expect(bot.api.last_markup).to be_a(Telegram::Bot::Types::ReplyKeyboardMarkup)
+      expect(bot.api.last_markup).to include('keyboard')
+      expect(bot.api.last_markup).to include('🔮 Гороскоп')
       expect(states.get('42')).to be_idle
     end
   end
@@ -84,7 +85,8 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
     it 'показывает inline-кнопки со знаками при /compatibility' do
       send_message('/compatibility')
       markup = bot.api.last_markup
-      expect(markup).to be_a(Telegram::Bot::Types::InlineKeyboardMarkup)
+      expect(markup).to include('inline_keyboard')
+      expect(markup).to include('compat1:leo')
       expect(states.get('42').name).to eq('awaiting_compatibility_first')
     end
 
@@ -162,6 +164,67 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       fresh_users_store = HoroscopeBot::Storage::JsonStore.new(File.join(tmp_dir, 'users.json'))
       fresh_users = HoroscopeBot::Storage::UserRepository.new(fresh_users_store)
       expect(fresh_users.sign('42')).to eq('leo')
+    end
+  end
+
+  describe '/tarot через inline-кнопки' do
+    it 'показывает кнопки выбора типа расклада' do
+      send_message('/tarot')
+      expect(bot.api.last_markup).to include('inline_keyboard')
+      expect(bot.api.last_markup).to include('tarot:single')
+      expect(states.get('42').name).to eq('awaiting_tarot_spread')
+    end
+
+    it 'делает расклад single и сбрасывает состояние' do
+      send_message('/tarot')
+      click_inline('tarot:single')
+      expect(bot.api.last_text).to include('Карта дня')
+      expect(states.get('42')).to be_idle
+    end
+
+    it 'делает расклад three с тремя позициями' do
+      send_message('/tarot')
+      click_inline('tarot:three')
+      text = bot.api.last_text
+      expect(text).to include('— Прошлое —')
+      expect(text).to include('— Настоящее —')
+      expect(text).to include('— Будущее —')
+    end
+
+    it 'сохраняет расклад в историю пользователя' do
+      send_message('/tarot')
+      click_inline('tarot:single')
+
+      history = users.find('42')['tarot_history']
+      expect(history).to be_an(Array)
+      expect(history.size).to eq(1)
+      expect(history.first['spread']).to eq('single')
+    end
+
+    it 'история ограничена 5 записями' do
+      7.times do
+        send_message('/tarot')
+        click_inline('tarot:single')
+      end
+
+      history = users.find('42')['tarot_history']
+      expect(history.size).to eq(5)
+    end
+  end
+
+  describe '/history' do
+    it 'сообщает, что истории нет, когда раскладов не было' do
+      send_message('/history')
+      expect(bot.api.last_text).to include('пока нет сохранённых')
+    end
+
+    it 'показывает последний расклад' do
+      send_message('/tarot')
+      click_inline('tarot:three')
+
+      send_message('/history')
+      expect(bot.api.last_text).to include('последние расклады')
+      expect(bot.api.last_text).to include('Прошлое — Настоящее — Будущее')
     end
   end
 end

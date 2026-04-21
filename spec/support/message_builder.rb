@@ -15,8 +15,8 @@ module MessageBuilder
     FakeMessage.new(text, FakeUser.new(user_id), FakeChat.new(chat_id))
   end
 
-  def build_callback(data:, user_id: 42, chat_id: 42, callback_id: 'cb1')
-    msg = FakeMessage.new(nil, FakeUser.new(user_id), FakeChat.new(chat_id))
+  def build_callback(data:, user_id: 42, chat_id: 42, callback_id: 'cb1', bot_id: 999_999)
+    msg = FakeMessage.new(nil, FakeUser.new(bot_id), FakeChat.new(chat_id))
     FakeCallback.new(callback_id, data, FakeUser.new(user_id), msg)
   end
 end

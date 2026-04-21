@@ -9,12 +9,14 @@ module HoroscopeBot
       AWAITING_BIRTHDATE = 'awaiting_birthdate'
       AWAITING_COMPATIBILITY_FIRST = 'awaiting_compatibility_first'
       AWAITING_COMPATIBILITY_SECOND = 'awaiting_compatibility_second'
+      AWAITING_TAROT_SPREAD = 'awaiting_tarot_spread'
 
       VALID_STATES = [
         IDLE,
         AWAITING_BIRTHDATE,
         AWAITING_COMPATIBILITY_FIRST,
-        AWAITING_COMPATIBILITY_SECOND
+        AWAITING_COMPATIBILITY_SECOND,
+        AWAITING_TAROT_SPREAD
       ].freeze
 
       attr_reader :name, :context

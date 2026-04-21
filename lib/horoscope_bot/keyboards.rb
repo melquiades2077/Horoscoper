@@ -7,25 +7,24 @@ module HoroscopeBot
     # Главное reply-меню (кнопки снизу экрана).
     MAIN_MENU = [
       ['🔮 Гороскоп', '💞 Совместимость'],
-      ['🃏 Таро', '⚙️ Настройки'],
-      ['❓ Помощь']
+      ['🃏 Таро', '📜 История'],
+      ['⚙️ Настройки', '❓ Помощь']
     ].freeze
 
     # Маппинг текста кнопки reply-меню на команду.
     # Роутер использует его, чтобы нажатия кнопок работали как команды.
     BUTTON_TO_COMMAND = {
-      '🔮 Гороскоп'        => '/horoscope',
-      '💞 Совместимость'   => '/compatibility',
-      '🃏 Таро'            => '/tarot',
-      '⚙️ Настройки'       => '/settings',
-      '❓ Помощь'           => '/help'
+      '🔮 Гороскоп'       => '/horoscope',
+      '💞 Совместимость'  => '/compatibility',
+      '🃏 Таро'           => '/tarot',
+      '📜 История'        => '/history',
+      '⚙️ Настройки'      => '/settings',
+      '❓ Помощь'          => '/help'
     }.freeze
 
     module_function
 
     # Inline-клавиатура со всеми 12 знаками зодиака (3 знака в ряд).
-    # Используется в /compatibility.
-    # @param prefix [String] префикс для callback_data, например "compat1" или "compat2"
     def zodiac_inline(prefix)
       Zodiac::SIGNS.each_slice(3).map do |row|
         row.map do |sign|
