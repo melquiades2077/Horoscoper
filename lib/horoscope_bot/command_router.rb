@@ -19,6 +19,7 @@ module HoroscopeBot
       '/compatibility' => Commands::CompatibilityCommand,
       '/tarot' => Commands::TarotCommand,
       '/history' => Commands::HistoryCommand,
+      '/ritual' => Commands::RitualCommand,
       '/cancel' => Commands::CancelCommand
     }.freeze
 

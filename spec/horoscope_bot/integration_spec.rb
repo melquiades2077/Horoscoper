@@ -45,6 +45,12 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       send_message('❓ Помощь')
       expect(bot.api.last_text).to include('Справка')
     end
+
+    it 'кнопка "✨ Ритуал дня" работает как /ritual' do
+      send_message('✨ Ритуал дня')
+      expect(bot.api.last_text).to include('Ритуал дня')
+      expect(bot.api.last_text).to include('Лучшее время')
+    end
   end
 
   describe 'полный сценарий настройки знака' do
@@ -225,6 +231,16 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       send_message('/history')
       expect(bot.api.last_text).to include('последние расклады')
       expect(bot.api.last_text).to include('Прошлое — Настоящее — Будущее')
+    end
+  end
+
+  describe '/ritual' do
+    it 'возвращает ритуал дня' do
+      send_message('/ritual')
+      expect(bot.api.last_text).to include('Ритуал дня')
+      expect(bot.api.last_text).to include('Действие:')
+      expect(bot.api.last_text).to include('Фокус:')
+      expect(bot.api.last_text).to include('Лучшее время:')
     end
   end
 end
