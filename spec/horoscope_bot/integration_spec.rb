@@ -51,6 +51,13 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       expect(bot.api.last_text).to include('Ритуал дня')
       expect(bot.api.last_text).to include('Лучшее время')
     end
+
+    it 'кнопка "🕯️ Аффирмация" работает как /affirmation' do
+      send_message('🕯️ Аффирмация')
+      expect(bot.api.last_text).to include('Аффирмация дня')
+      expect(bot.api.last_text).to include('Шаг 1/2')
+      expect(bot.api.last_markup).to include('affirm_topic:love')
+    end
   end
 
   describe 'полный сценарий настройки знака' do
@@ -241,6 +248,40 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       expect(bot.api.last_text).to include('Действие:')
       expect(bot.api.last_text).to include('Фокус:')
       expect(bot.api.last_text).to include('Лучшее время:')
+    end
+  end
+
+  describe '/affirmation через inline-кнопки' do
+    it 'показывает кнопки выбора сферы и ставит состояние первого шага' do
+      send_message('/affirmation')
+      expect(bot.api.last_text).to include('Шаг 1/2')
+      expect(bot.api.last_markup).to include('affirm_topic:love')
+      expect(states.get('42').name).to eq('awaiting_affirmation_topic')
+    end
+
+    it 'проводит пользователя через оба шага и сбрасывает состояние' do
+      send_message('/affirmation')
+
+      click_inline('affirm_topic:career')
+      expect(bot.api.last_text).to include('Шаг 2/2')
+      expect(bot.api.last_markup).to include('affirm_tone:soft')
+      expect(states.get('42').name).to eq('awaiting_affirmation_tone')
+      expect(states.get('42').context['topic_key']).to eq('career')
+
+      click_inline('affirm_tone:strong')
+      expect(bot.api.last_text).to include('Аффирмация дня')
+      expect(bot.api.last_text).to include('Сфера: Карьера')
+      expect(states.get('42')).to be_idle
+    end
+
+    it 'работает и в текстовом fallback-режиме' do
+      send_message('/affirmation')
+      send_message('любовь')
+      expect(bot.api.last_text).to include('Шаг 2/2')
+      send_message('мягкий')
+      expect(bot.api.last_text).to include('Аффирмация дня')
+      expect(bot.api.last_text).to include('Сфера: Любовь')
+      expect(states.get('42')).to be_idle
     end
   end
 end

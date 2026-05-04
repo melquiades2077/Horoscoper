@@ -10,13 +10,17 @@ module HoroscopeBot
       AWAITING_COMPATIBILITY_FIRST = 'awaiting_compatibility_first'
       AWAITING_COMPATIBILITY_SECOND = 'awaiting_compatibility_second'
       AWAITING_TAROT_SPREAD = 'awaiting_tarot_spread'
+      AWAITING_AFFIRMATION_TOPIC = 'awaiting_affirmation_topic'
+      AWAITING_AFFIRMATION_TONE = 'awaiting_affirmation_tone'
 
       VALID_STATES = [
         IDLE,
         AWAITING_BIRTHDATE,
         AWAITING_COMPATIBILITY_FIRST,
         AWAITING_COMPATIBILITY_SECOND,
-        AWAITING_TAROT_SPREAD
+        AWAITING_TAROT_SPREAD,
+        AWAITING_AFFIRMATION_TOPIC,
+        AWAITING_AFFIRMATION_TONE
       ].freeze
 
       attr_reader :name, :context

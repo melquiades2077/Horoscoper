@@ -20,6 +20,7 @@ module HoroscopeBot
       '/tarot' => Commands::TarotCommand,
       '/history' => Commands::HistoryCommand,
       '/ritual' => Commands::RitualCommand,
+      '/affirmation' => Commands::AffirmationCommand,
       '/cancel' => Commands::CancelCommand
     }.freeze
 
@@ -28,7 +29,9 @@ module HoroscopeBot
       States::UserState::AWAITING_BIRTHDATE => Commands::SettingsCommand,
       States::UserState::AWAITING_COMPATIBILITY_FIRST => Commands::CompatibilityCommand,
       States::UserState::AWAITING_COMPATIBILITY_SECOND => Commands::CompatibilityCommand,
-      States::UserState::AWAITING_TAROT_SPREAD => Commands::TarotCommand
+      States::UserState::AWAITING_TAROT_SPREAD => Commands::TarotCommand,
+      States::UserState::AWAITING_AFFIRMATION_TOPIC => Commands::AffirmationCommand,
+      States::UserState::AWAITING_AFFIRMATION_TONE => Commands::AffirmationCommand
     }.freeze
 
     # Какая команда обрабатывает callback с данным префиксом (до первого двоеточия).
@@ -36,7 +39,9 @@ module HoroscopeBot
     CALLBACK_HANDLERS = {
       'compat1' => Commands::CompatibilityCommand,
       'compat2' => Commands::CompatibilityCommand,
-      'tarot' => Commands::TarotCommand
+      'tarot' => Commands::TarotCommand,
+      'affirm_topic' => Commands::AffirmationCommand,
+      'affirm_tone' => Commands::AffirmationCommand
     }.freeze
 
     FALLBACK_TEXT = 'Не понимаю. Нажмите кнопку или отправьте /help.'
