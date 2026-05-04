@@ -259,16 +259,22 @@ RSpec.describe 'Bot integration', type: :integration do # rubocop:disable RSpec/
       expect(states.get('42').name).to eq('awaiting_affirmation_topic')
     end
 
-    it 'проводит пользователя через оба шага и сбрасывает состояние' do
+    it 'после выбора сферы показывает шаг 2 и сохраняет topic в состоянии' do
       send_message('/affirmation')
-
       click_inline('affirm_topic:career')
+
       expect(bot.api.last_text).to include('Шаг 2/2')
       expect(bot.api.last_markup).to include('affirm_tone:soft')
-      expect(states.get('42').name).to eq('awaiting_affirmation_tone')
-      expect(states.get('42').context['topic_key']).to eq('career')
+      state = states.get('42')
+      expect(state.name).to eq('awaiting_affirmation_tone')
+      expect(state.context['topic_key']).to eq('career')
+    end
 
+    it 'после выбора тона завершает сценарий и сбрасывает состояние' do
+      send_message('/affirmation')
+      click_inline('affirm_topic:career')
       click_inline('affirm_tone:strong')
+
       expect(bot.api.last_text).to include('Аффирмация дня')
       expect(bot.api.last_text).to include('Сфера: Карьера')
       expect(states.get('42')).to be_idle
